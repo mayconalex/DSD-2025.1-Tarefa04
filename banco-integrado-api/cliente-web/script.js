@@ -1,4 +1,4 @@
-const GATEWAY_BASE_URL = 'https://verbose-meme-gr7w774vqjpfg55-3000.app.github.dev/';
+const GATEWAY_BASE_URL = 'https://verbose-meme-gr7w774vqjpfg55-3000.app.github.dev';
 
 document.addEventListener('DOMContentLoaded', () => {
     const buscarBtn = document.getElementById('buscarBtn');
