@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-g">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Cliente - Banco Integrado</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background-color: #f4f4f9; }
+        h1 { color: #333; }
+        #input-container { margin-bottom: 20px; }
+        input { padding: 10px; width: 200px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px;}
+        button { padding: 10px 20px; border: none; background-color: #007bff; color: white; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        #resultado { background-color: #e9ecef; border: 1px solid #dee2e6; padding: 15px; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; }
+        .loading { color: #555; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+
+    <h1>Consulta de Perfil de Cliente</h1>
+    
+    <div id="input-container">
+        <input type="text" id="idCliente" placeholder="Digite o ID do Cliente (ex: 123)">
+        <button id="buscarBtn">Buscar Cliente</button>
+    </div>
+
+    <h2>Resultado da API:</h2>
+    <pre id="resultado">Aguardando consulta...</pre>
+
+    <script src="script.js"></script>
+</body>
+</html>
