@@ -3,8 +3,10 @@ const axios = require('axios');
 const soap = require('soap');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
+const cors = require('cors');
 
 const app = express();
+app.use(cors());
 const PORT = 3000;
 
 const PERFIS_API_URL = 'http://localhost:3001';
