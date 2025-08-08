@@ -4,35 +4,68 @@ document.addEventListener('DOMContentLoaded', () => {
     const buscarBtn = document.getElementById('buscarBtn');
     const relatorioBtn = document.getElementById('relatorioBtn');
     const idClienteInput = document.getElementById('idCliente');
-    const resultadoDiv = document.getElementById('resultado');
+    
+    const resultadoContainer = document.getElementById('resultado-container');
+    const dadosClienteDiv = document.getElementById('dados-cliente');
+    const acoesClienteDiv = document.getElementById('acoes-cliente');
+    const notificacoesDiv = document.getElementById('notificacoes');
 
+    function renderizarResultado(data) {
+        dadosClienteDiv.innerHTML = '';
+        acoesClienteDiv.innerHTML = '';
+        notificacoesDiv.innerHTML = '';
+        resultadoContainer.style.display = 'block';
+        const dadosHtml = `
+            <ul>
+                <li><strong>ID:</strong> ${data.id}</li>
+                <li><strong>Nome:</strong> ${data.nome}</li>
+                <li><strong>Email:</strong> ${data.email}</li>
+                <li><strong>Idade:</strong> ${data.idade}</li>
+                <li><strong>Score de Crédito:</strong> ${data.scoreCredito}</li>
+            </ul>
+        `;
+        dadosClienteDiv.innerHTML = dadosHtml;
+
+        if (data._links) {
+            for (const rel in data._links) {
+                const link = data._links[rel];
+                const btn = document.createElement('button');
+                btn.textContent = rel.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                btn.onclick = () => {
+                    alert(`Ação disparada: ${rel}\nNavegaria para: ${link.href}`);
+                };
+                acoesClienteDiv.appendChild(btn);
+            }
+        }
+    }
+
+    function mostrarNotificacao(mensagem, tipo = 'info') {
+        notificacoesDiv.innerHTML = `<p class="${tipo}">${mensagem}</p>`;
+        setTimeout(() => {
+            notificacoesDiv.innerHTML = '';
+        }, 5000);
+    }
+    
     buscarBtn.addEventListener('click', async () => {
         const idCliente = idClienteInput.value.trim();
         if (!idCliente) {
-            resultadoDiv.textContent = 'Por favor, digite um ID de cliente.';
-            resultadoDiv.className = 'error';
+            mostrarNotificacao('Por favor, digite um ID de cliente.', 'error');
             return;
         }
-
-        resultadoDiv.textContent = 'Buscando dados...';
-        resultadoDiv.className = 'loading';
+        
+        resultadoContainer.style.display = 'none';
+        mostrarNotificacao('Buscando dados...');
 
         try {
-            const apiUrl = `${GATEWAY_BASE_URL}/clientes/${idCliente}`;
-            
-            const response = await fetch(apiUrl);
+            const response = await fetch(`${GATEWAY_BASE_URL}/clientes/${idCliente}`);
             const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || `Erro ${response.status}`);
-            }
+            if (!response.ok) throw new Error(data.message || `Erro ${response.status}`);
             
-            resultadoDiv.textContent = JSON.stringify(data, null, 2);
-            resultadoDiv.className = '';
+            renderizarResultado(data);
 
         } catch (error) {
-            resultadoDiv.textContent = `Erro ao consultar a API: ${error.message}`;
-            resultadoDiv.className = 'error';
+            resultadoContainer.style.display = 'none';
+            mostrarNotificacao(`Erro ao consultar a API: ${error.message}`, 'error');
             console.error('Falha na requisição síncrona:', error);
         }
     });
@@ -40,36 +73,21 @@ document.addEventListener('DOMContentLoaded', () => {
     relatorioBtn.addEventListener('click', async () => {
         const idCliente = idClienteInput.value.trim();
         if (!idCliente) {
-            resultadoDiv.textContent = 'Por favor, digite um ID de cliente.';
-            resultadoDiv.className = 'error';
+            mostrarNotificacao('Por favor, digite um ID de cliente.', 'error');
             return;
         }
-
-        resultadoDiv.textContent = 'Enviando pedido de relatório para a fila...';
-        resultadoDiv.className = 'loading';
-
+        
+        mostrarNotificacao('Enviando pedido de relatório para a fila...');
+        
         try {
-            const apiUrl = `${GATEWAY_BASE_URL}/clientes/${idCliente}/relatorios`;
-            
-            const response = await fetch(apiUrl, {
-                method: 'POST'
-            });
-            
+            const response = await fetch(`${GATEWAY_BASE_URL}/clientes/${idCliente}/relatorios`, { method: 'POST' });
             const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || `Erro ${response.status}`);
-            }
+            if (!response.ok) throw new Error(data.message || `Erro ${response.status}`);
             
-            resultadoDiv.textContent = `Resposta do Gateway (Status ${response.status}):\n\n` + JSON.stringify(data, null, 2);
-            resultadoDiv.className = '';
-            
-            alert("Pedido de relatório enviado com sucesso! Observe o terminal do 'servico-relatorios-consumer' para ver o processamento assíncrono.");
+            mostrarNotificacao(`Gateway respondeu (Status ${response.status}): ${data.status}`, 'info');
 
-        } catch (error)
-        {
-            resultadoDiv.textContent = `Erro ao solicitar o relatório: ${error.message}`;
-            resultadoDiv.className = 'error';
+        } catch (error) {
+            mostrarNotificacao(`Erro ao solicitar o relatório: ${error.message}`, 'error');
             console.error('Falha na requisição assíncrona:', error);
         }
     });

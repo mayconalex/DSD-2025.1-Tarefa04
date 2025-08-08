@@ -6,29 +6,41 @@
     <title>Consulta de Cliente - Banco Integrado</title>
     <style>
         body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background-color: #f4f4f9; }
-        h1 { color: #333; }
+        h1, h2 { color: #333; }
         #input-container { margin-bottom: 20px; }
         input { padding: 10px; width: 200px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px;}
-        button { padding: 10px 20px; border: none; background-color: #007bff; color: white; border-radius: 4px; cursor: pointer; }
+        button { padding: 10px 15px; margin-right: 10px; border: none; background-color: #007bff; color: white; border-radius: 4px; cursor: pointer; }
         button:hover { background-color: #0056b3; }
-        #resultado { background-color: #e9ecef; border: 1px solid #dee2e6; padding: 15px; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; }
-        .loading { color: #555; }
-        .error { color: red; }
+        #resultado-container { margin-top: 20px; background-color: white; border: 1px solid #dee2e6; padding: 15px; border-radius: 4px; }
+        #dados-cliente ul { list-style-type: none; padding: 0; }
+        #dados-cliente li { padding: 5px 0; }
+        #acoes-cliente button { background-color: #6c757d; }
+        #notificacoes p { padding: 10px; border-radius: 4px; }
+        .info { background-color: #e2e3e5; color: #383d41; }
+        .error { background-color: #f8d7da; color: #721c24; }
     </style>
 </head>
+      
 <body>
-
     <h1>Consulta de Perfil de Cliente</h1>
     
     <div id="input-container">
         <input type="text" id="idCliente" placeholder="Digite o ID do Cliente (ex: 123)">
-        <button id="buscarBtn">Buscar Cliente</button>
+        <button id="buscarBtn">Buscar Perfil</button>
         <button id="relatorioBtn">Gerar Relatório</button>
     </div>
 
-    <h2>Resultado da API:</h2>
-    <pre id="resultado">Aguardando consulta...</pre>
+    <div id="notificacoes"></div>
+
+    <div id="resultado-container" style="display: none;">
+        <h2>Dados do Cliente</h2>
+        <div id="dados-cliente"></div>
+        
+        <h2>Ações Disponíveis</h2>
+        <div id="acoes-cliente"></div>
+    </div>
 
     <script src="script.js"></script>
 </body>
+    
 </html>
