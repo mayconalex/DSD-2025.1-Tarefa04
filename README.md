@@ -2,6 +2,14 @@
 
 Este projeto é uma demonstração prática de uma arquitetura de microsserviços moderna, que utiliza um API Gateway para orquestrar a comunicação entre diferentes tipos de serviços de backend. Ele implementa tanto fluxos de comunicação síncronos (requisição-resposta) quanto assíncronos (baseados em eventos com filas de mensagens).
 
+---
+
+**Slides de Apresentação no Gamma:** https://gamma.app/docs/REST-SOAP-e-MOM-zxuxqapgjevfmdz
+
+**Versão em PDF:** [⬇️Baixar PDF](./presentation.pdf)
+
+---
+
 ## Arquitetura do Sistema
 
 O sistema é composto pelos seguintes serviços:
