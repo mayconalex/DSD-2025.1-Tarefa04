@@ -4,10 +4,29 @@ const soap = require('soap');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const cors = require('cors');
+const amqp = require('amqplib');
 
 const app = express();
 app.use(cors());
 const PORT = 3000;
+
+const rabbitmqUrl = 'amqp://guest:guest@localhost:5672/';
+const nomeDaFila = 'fila_de_relatorios';
+let channel = null;
+
+async function conectarRabbitMQ() {
+    try {
+        const connection = await amqp.connect(rabbitmqUrl);
+        channel = await connection.createChannel();
+        await channel.assertQueue(nomeDaFila, { durable: true });
+        console.log('✅ Gateway conectado ao RabbitMQ com sucesso!');
+    } catch (error) {
+        console.error('❌ Falha ao conectar o Gateway ao RabbitMQ:', error.message);
+        setTimeout(conectarRabbitMQ, 5000);
+    }
+}
+
+conectarRabbitMQ();
 
 const PERFIS_API_URL = 'http://localhost:3001';
 
@@ -21,7 +40,7 @@ const swaggerOptions = {
             version: '1.0.0',
             description: 'API Gateway que integra um serviço REST de perfis e um serviço SOAP de score de crédito.',
         },
-        servers: [{ url: `http://localhost:${PORT}` }],
+        servers: [{ url: `https://verbose-meme-gr7w774vqjpfg55-3000.app.github.dev` }],
     },
     apis: ['./server.js'],
 };
@@ -135,6 +154,61 @@ app.get('/clientes/:id', async (req, res) => {
             res.status(500).json({ message: 'Erro interno ao processar a requisição.' });
         }
     }
+});
+
+/**
+ * @swagger
+ * /clientes/{id}/relatorios:
+ *   post:
+ *     summary: Solicita a geração de um relatório financeiro para um cliente.
+ *     description: Esta é uma operação assíncrona. O gateway publica um pedido em uma fila de mensagens e retorna imediatamente uma confirmação.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do cliente para o qual o relatório será gerado.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '202':
+ *         description: Pedido aceito para processamento.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "Pedido de relatório recebido e sendo processado."
+ *                 clienteId:
+ *                   type: string
+ *                   example: "123"
+ *       '500':
+ *         description: Erro ao publicar a mensagem na fila ou serviço de mensageria indisponível.
+ */
+app.post('/clientes/:id/relatorios', (req, res) => {
+    const { id } = req.params;
+
+    if (!channel) {
+        return res.status(500).json({ message: 'Serviço de mensageria indisponível no momento.' });
+    }
+
+    const mensagem = {
+        clienteId: id,
+        tipoRelatorio: 'extrato_anual',
+        solicitadoEm: new Date().toISOString()
+    };
+    
+    const bufferMensagem = Buffer.from(JSON.stringify(mensagem));
+
+    channel.sendToQueue(nomeDaFila, bufferMensagem, { persistent: true });
+
+    console.log(`[>] Pedido de relatório para o cliente ${id} enviado para a fila.`);
+
+    res.status(202).json({
+        status: "Pedido de relatório recebido e sendo processado.",
+        clienteId: id
+    });
 });
 
 app.listen(PORT, () => {
